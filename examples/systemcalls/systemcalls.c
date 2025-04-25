@@ -72,21 +72,22 @@ bool do_exec(int count, ...)
 	
 	if (cPID == 0){
 		execv(command[0], command);
+        perror("*** ERROR: exec failed with return value -1");
+        exit(1);
 	}else if (cPID > 0){
-		cPID = wait(&status);
+        cPID = waitpid(cPID, &status, 0);
         if (WIFEXITED(status)){
-            printf("%d", WEXITSTATUS(status));
-            printf("***************************************");
             if (WEXITSTATUS(status)==0){
                 return true;
             }else{
                 return false;
             }
-        }
-	}
-
+    }
+    }else if (cPID < 0){
+        exit(-1);
+    }
     va_end(args);
-	return true;
+    return false;
 }
 
 /**
