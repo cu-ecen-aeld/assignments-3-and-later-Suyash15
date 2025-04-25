@@ -1,4 +1,9 @@
 #include "systemcalls.h"
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -15,9 +20,13 @@ bool do_system(const char *cmd)
  *  Call the system() function with the command set in the cmd
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
-*/
-
-    return true;
+ */
+     int ret = system(cmd);
+     if (ret==0){
+       	return true;
+     }else{
+        return false;
+     }
 }
 
 /**
@@ -58,10 +67,26 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    pid_t cPID = fork();
+    int status;
+	
+	if (cPID == 0){
+		execv(command[0], command);
+	}else if (cPID > 0){
+		cPID = wait(&status);
+        if (WIFEXITED(status)){
+            printf("%d", WEXITSTATUS(status));
+            printf("***************************************");
+            if (WEXITSTATUS(status)==0){
+                return true;
+            }else{
+                return false;
+            }
+        }
+	}
 
     va_end(args);
-
-    return true;
+	return true;
 }
 
 /**
@@ -92,8 +117,27 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    pid_t cPID = fork();
+    int status;
+    if(cPID==-1){
+	    return false;
+    }
+    else if(cPID==0){
+	    dup2(fd, 1);
+	    close(fd);
+	    execv(command[0], command);
+	    exit(-1);
+    }else{
+    close(fd);
+    }
 
     va_end(args);
 
-    return true;
+    if(waitpid(cPID, &status, 0)==-1){
+	    return false;
+    }
+    else{
+	    return true;
+    }
 }
