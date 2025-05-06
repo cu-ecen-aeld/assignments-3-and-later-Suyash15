@@ -13,6 +13,7 @@ FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
 SYSROOT_PATH=$(${CROSS_COMPILE}gcc --print-sysroot)
+FINDER_HOME_DIR=$(pwd)
 
 if [ $# -lt 1 ]
 then
@@ -36,7 +37,7 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     git checkout ${KERNEL_VERSION}
 
     # TODO: Add your kernel build steps here
-    make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- mrproper  
+    # make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- mrproper  
     make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- defconfig
     make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- all
     make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- modules
@@ -94,7 +95,7 @@ sudo mknod -m 666 dev/null c 1 3
 sudo mknod -m 666 dev/console c 5 1
 
 # TODO: Clean and build the writer utility
-cd "/home/kinshu/course/assignment-1-Suyash15/finder-app"
+cd ${FINDER_HOME_DIR}
 make clean
 make CROSS_COMPILE=${CROSS_COMPILE}
 cp ./writer ${OUTDIR}/rootfs/home
