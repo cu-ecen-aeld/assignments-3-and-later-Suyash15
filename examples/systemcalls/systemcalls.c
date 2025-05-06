@@ -82,7 +82,7 @@ bool do_exec(int count, ...)
             }else{
                 return false;
             }
-    }
+        }
     }else if (cPID < 0){
         exit(-1);
     }
